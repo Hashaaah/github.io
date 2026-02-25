@@ -6,82 +6,73 @@
 <title>UB Bargain Lab</title>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
 <script>
 
-fetch('prado.csv')
+fetch('./prado.csv')
+
 .then(response => response.text())
+
 .then(data => {
 
-let lines = data.trim().split('\n');
+let rows = data.trim().split('\n');
 
-let headers = lines[0].split(',');
+// header row
+let headers = rows[0]
+.split(',')
+.map(h => h.trim());
 
+// find column numbers automatically
 let priceIndex = headers.indexOf('price_1');
 let manIndex = headers.indexOf('man_date');
+let importIndex = headers.indexOf('import_date');
+let engineIndex = headers.indexOf('engine');
 
-let dataset=[];
+console.log(priceIndex, manIndex);
 
-for(let i=1;i<lines.length;i++){
+let labels=[];
+let prices=[];
 
-// safer CSV split
-let cols = lines[i].match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g);
+rows.slice(1).forEach(row=>{
 
-if(!cols) continue;
+let cols = row.split(',');
 
-let price=parseFloat(cols[priceIndex]);
-let year=parseInt(cols[manIndex]);
+let price = cols[priceIndex];
+let man = cols[manIndex];
 
-if(!isNaN(price) && !isNaN(year)){
+if(!price || !man) return;
 
-dataset.push({
+// remove ₮ or spaces if exist
+price = price.replace(/[^\d]/g,'');
 
-x:year,
-y:price
+price = parseFloat(price);
+
+if(!isNaN(price)){
+
+labels.push(man);
+
+prices.push(price);
+
+}
 
 });
-
-}
-
-}
 
 const ctx=document.getElementById('chart');
 
 new Chart(ctx,{
 
-type:'scatter',
+type:'line',
 
 data:{
 
+labels:labels,
+
 datasets:[{
 
-label:'Price vs Manufacture Year',
+label:'Prado Price vs Manufacture Year',
 
-data:dataset
+data:prices
 
 }]
-
-},
-
-options:{
-
-scales:{
-
-x:{
-title:{
-display:true,
-text:'Manufacture Year'
-}
-},
-
-y:{
-title:{
-display:true,
-text:'Price'
-}
-}
-
-}
 
 }
 
@@ -90,6 +81,7 @@ text:'Price'
 });
 
 </script>
+  
 fetch('prado.csv')
 
 .then(response => response.text())
