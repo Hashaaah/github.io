@@ -13,34 +13,37 @@ fetch('prado.csv')
 .then(response => response.text())
 .then(data => {
 
-let rows = data.trim().split('\n');
+let lines = data.trim().split('\n');
 
-// first row = headers
-let headers = rows[0].split(',');
+let headers = lines[0].split(',');
 
-// find column positions automatically
 let priceIndex = headers.indexOf('price_1');
 let manIndex = headers.indexOf('man_date');
 
-let labels=[];
-let prices=[];
+let dataset=[];
 
-rows.slice(1).forEach(row=>{
+for(let i=1;i<lines.length;i++){
 
-let cols=row.split(',');
+// safer CSV split
+let cols = lines[i].match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g);
 
-let price = cols[priceIndex];
-let man = cols[manIndex];
+if(!cols) continue;
 
-if(price && man){
+let price=parseFloat(cols[priceIndex]);
+let year=parseInt(cols[manIndex]);
 
-labels.push(man); // X axis = manufacture year
+if(!isNaN(price) && !isNaN(year)){
 
-prices.push(parseFloat(price));
+dataset.push({
+
+x:year,
+y:price
+
+});
 
 }
 
-});
+}
 
 const ctx=document.getElementById('chart');
 
@@ -49,18 +52,15 @@ new Chart(ctx,{
 type:'scatter',
 
 data:{
+
 datasets:[{
 
-label:'Prado Price vs Manufacture Date',
+label:'Price vs Manufacture Year',
 
-data:labels.map((year,i)=>({
-
-x: parseInt(year),
-y: prices[i]
-
-}))
+data:dataset
 
 }]
+
 },
 
 options:{
@@ -90,7 +90,6 @@ text:'Price'
 });
 
 </script>
-
 fetch('prado.csv')
 
 .then(response => response.text())
