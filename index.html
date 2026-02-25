@@ -7,35 +7,89 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<style>
-
-body{
-background:#111;
-color:white;
-text-align:center;
-font-family:Arial;
-}
-
-canvas{
-
-max-width:700px;
-margin:auto;
-
-}
-
-</style>
-
-</head>
-
-<body>
-
-<h1>🔥 UB Bargain Lab</h1>
-
-<p>Prado Market Tracker</p>
-
-<canvas id="chart"></canvas>
-
 <script>
+
+fetch('prado.csv')
+.then(response => response.text())
+.then(data => {
+
+let rows = data.trim().split('\n');
+
+// first row = headers
+let headers = rows[0].split(',');
+
+// find column positions automatically
+let priceIndex = headers.indexOf('price_1');
+let manIndex = headers.indexOf('man_date');
+
+let labels=[];
+let prices=[];
+
+rows.slice(1).forEach(row=>{
+
+let cols=row.split(',');
+
+let price = cols[priceIndex];
+let man = cols[manIndex];
+
+if(price && man){
+
+labels.push(man); // X axis = manufacture year
+
+prices.push(parseFloat(price));
+
+}
+
+});
+
+const ctx=document.getElementById('chart');
+
+new Chart(ctx,{
+
+type:'scatter',
+
+data:{
+datasets:[{
+
+label:'Prado Price vs Manufacture Date',
+
+data:labels.map((year,i)=>({
+
+x: parseInt(year),
+y: prices[i]
+
+}))
+
+}]
+},
+
+options:{
+
+scales:{
+
+x:{
+title:{
+display:true,
+text:'Manufacture Year'
+}
+},
+
+y:{
+title:{
+display:true,
+text:'Price'
+}
+}
+
+}
+
+}
+
+});
+
+});
+
+</script>
 
 fetch('prado.csv')
 
