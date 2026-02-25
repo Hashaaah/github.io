@@ -31,13 +31,35 @@ margin:auto;
 
 <h1>🔥 UB Bargain Lab</h1>
 
-<p>Prado 150 Price Trend (Test Data)</p>
+<p>Prado Market Tracker</p>
 
 <canvas id="chart"></canvas>
 
 <script>
 
-const ctx = document.getElementById('chart');
+fetch('prado.csv')
+
+.then(response => response.text())
+
+.then(data => {
+
+let rows = data.split('\n').slice(1);
+
+let labels = [];
+
+let prices = [];
+
+rows.forEach(row=>{
+
+let cols = row.split(',');
+
+labels.push(cols[0]);
+
+prices.push(parseFloat(cols[1]));
+
+});
+
+const ctx=document.getElementById('chart');
 
 new Chart(ctx,{
 
@@ -45,33 +67,19 @@ type:'line',
 
 data:{
 
-labels:[
-'Mon',
-'Tue',
-'Wed',
-'Thu',
-'Fri',
-'Sat',
-'Sun'
-],
+labels:labels,
 
 datasets:[{
 
-label:'Average Price (Million ₮)',
+label:'Price',
 
-data:[
-110,
-108,
-105,
-102,
-100,
-98,
-97
-]
+data:prices
 
 }]
 
 }
+
+});
 
 });
 
